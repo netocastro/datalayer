@@ -1,0 +1,31 @@
+{
+  "name": "nttech/datalayer",
+  "description": "The data layer is a persistent abstraction component of your database that PDO",
+  "keywords": [
+    "NTTech",
+    "Database",
+    "PDO",
+    "Save",
+    "Delete",
+    "Destroy",
+    "CRUD"
+  ],
+  "homepage": "https://www.mundauvalley.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Neto Castro",
+      "email": "netocastrotec@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "NTTech\\DataLayer\\": "src"
+    }
+  }
+}
