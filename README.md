@@ -1,13 +1,13 @@
 # DataLayer @NTTech
 
 [![Maintainer](http://img.shields.io/badge/maintainer-@giovannialoliveira-blue.svg?style=flat-square)](https://www.facebook.com/neto.castro.739)
-[![Source Code](http://img.shields.io/badge/source-stonks/datalayer-blue.svg?style=flat-square)](https://github.com/netocastro/datalayer)
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/stonks/datalayer.svg?style=flat-square)](https://packagist.org/packages/nttech/datalayer)
+[![Source Code](http://img.shields.io/badge/source-nttech/datalayer-blue.svg?style=flat-square)](https://github.com/netocastro/datalayer)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/nttech/datalayer.svg?style=flat-square)](https://packagist.org/packages/nttech/datalayer)
 [![Latest Version](https://img.shields.io/github/release/giovannialo/datalayer.svg?style=flat-square)](https://packagist.org/packages/nttech/datalayer/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Build](https://img.shields.io/scrutinizer/build/g/giovannialo/datalayer.svg?style=flat-square)](https://scrutinizer-ci.com/g/nttech/datalayer)
 [![Quality Score](https://img.shields.io/scrutinizer/g/giovannialo/datalayer.svg?style=flat-square)](https://scrutinizer-ci.com/g/nttech/datalayer)
-[![Total Downloads](https://img.shields.io/packagist/dt/stonks/datalayer.svg?style=flat-square)](https://packagist.org/packages/nttech/datalayer)
+[![Total Downloads](https://img.shields.io/packagist/dt/nttech/datalayer.svg?style=flat-square)](https://packagist.org/packages/nttech/datalayer)
 
 O DataLayer é um componente para abstração de persistência para banco de dados, que usa PDO com prepared statements para executar rotinas comuns como cadastrar, ler, editar e remover dados.
 
