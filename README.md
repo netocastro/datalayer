@@ -25,7 +25,7 @@ O DataLayer é um componente para abstração de persistência para banco de dad
 DataLayer está disponível via Composer:
 
 ```bash
-"nttech/datalayer": "1.0.0"
+"nttech/datalayer": "v1.0.0"
 ```
 
 ou execute
