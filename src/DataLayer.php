@@ -28,7 +28,7 @@ abstract class DataLayer
     private bool $timestamps;
 
     /** @var array|null */
-    private ?array $database;
+    private ?string $database;
 
     /** @var string|null */
     protected ?string $statement = null;
