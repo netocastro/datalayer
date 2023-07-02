@@ -3,106 +3,176 @@
 namespace NTTech\DataLayer;
 
 use DateTime;
+use Exception;
 use PDOException;
+use stdClass;
 
 /**
  * Trait CrudTrait
- * @package NTTech\DataLayer
+ *
+ * @package Stonks\DataLayer
  */
 trait CrudTrait
 {
-    /**
-     * @param array $data
-     * @return int|null
-     * @throws PDOException
-     */
-    protected function create(array $data): string|bool
-    {
-        if ($this->timestamps) {
-            $data["created_at"] = (new DateTime("now"))->format("Y-m-d H:i:s");
-        }
 
-        try {
-            $columns = implode(", ", array_keys($data));
-            $values = ":" . implode(", :", array_keys($data));
+	/**
+	 * @var Exception|PDOException|null
+	 */
+	private $fail;
 
-            $stmt = Connect::getInstance($this->database);
-            $prepare = $stmt->prepare("INSERT INTO {$this->entity} ({$columns}) VALUES ({$values})");
-            $prepare->execute($this->filter($data));
+	/**
+	 * @param array $data
+	 * @return int|string|null
+	 */
+	private function create(array $data)
+	{
+		if ((is_bool($this->timestamps) && $this->timestamps) || $this->timestamps === 'created_at') {
+			$data['created_at'] = (new DateTime('now'))->format('Y-m-d H:i:s');
+		}
 
-            return $stmt->lastInsertId();
-        } catch (PDOException $exception) {
-            $this->fail = $exception;
-            return false;
-        }
-    }
+		try {
+			$connect = Connect::testConnection($this->database);
+			$treatData = $this->treatDataCreate($data);
 
-    /**
-     * @param array $data
-     * @param string $terms
-     * @param string $params
-     * @return int|null
-     * @throws PDOException
-     */
-    protected function update(array $data, string $terms, string $params): ?int
-    {
-        if ($this->timestamps) {
-            $data["updated_at"] = (new DateTime("now"))->format("Y-m-d H:i:s");
-        }
+			$statement = $connect->prepare("INSERT INTO {$this->entity} ({$treatData->columns}) VALUES ({$treatData->values})");
+			$statement->execute($this->filter($treatData->data));
 
-        try {
-            $dateSet = [];
-            foreach ($data as $bind => $value) {
-                $dateSet[] = "{$bind} = :{$bind}";
-            }
-            $dateSet = implode(", ", $dateSet);
-            parse_str($params ?? "", $params);
+			$lastInsertId = $connect->lastInsertId();
+			$primary = $this->primary;
 
-            $stmt = Connect::getInstance($this->database);
-            $prepare = $stmt->prepare("UPDATE {$this->entity} SET {$dateSet} WHERE {$terms}");
-            $prepare->execute($this->filter(array_merge($data, $params)));
+			return ($lastInsertId ? $lastInsertId : $this->data->$primary);
+		} catch (PDOException $exception) {
+			$this->fail = $exception;
+			return null;
+		}
+	}
 
-            return $prepare->rowCount();
-        } catch (PDOException $exception) {
-            $this->fail = $exception;
-            return null;
-        }
-    }
+	/**
+	 * @param array $data
+	 * @param string $terms
+	 * @param string $params
+	 * @return int|null
+	 */
+	private function update(array $data, string $terms, string $params): ?int
+	{
+		if ((is_bool($this->timestamps) && $this->timestamps) || $this->timestamps === 'updated_at') {
+			$data['updated_at'] = (new DateTime('now'))->format('Y-m-d H:i:s');
+		}
 
-    /**
-     * @param string $terms
-     * @param string|null $params
-     * @return bool
-     */
-    public function delete(string $terms, ?string $params): bool
-    {
-        try {
-            $stmt = Connect::getInstance($this->database);
-            $prepare = $stmt->prepare("DELETE FROM {$this->entity} WHERE {$terms}");
-            if ($params) {
-                parse_str($params, $params);
-                $prepare->execute($params);
-                return true;
-            }
+		try {
+			$connect = Connect::testConnection($this->database);
+			$treatData = $this->treatDataUpdate($data);
 
-            $prepare->execute();
-            return true;
-        } catch (PDOException $exception) {
-            $this->fail = $exception;
-            return false;
-        }
-    }
+			parse_str($params, $arrParams);
 
-    /**
-     * @param array $data
-     * @return array|null
-     */
-    private function filter(array $data): ?array
-    {
-        $filter = [];
-        foreach ($data as $key => $value) {
-            $filter[$key] = (is_null($value) ? null : filter_var($value, FILTER_DEFAULT));
-        }
-        return $filter;
-    }
+			$statement = $connect->prepare("UPDATE {$this->entity} SET {$treatData->values} WHERE {$terms}");
+			$statement->execute($this->filter(array_merge($treatData->data, $arrParams)));
+
+			return ($statement->rowCount() ?? 1);
+		} catch (PDOException $exception) {
+			$this->fail = $exception;
+			return null;
+		}
+	}
+
+	/**
+	 * @param string $terms
+	 * @param string|null $params
+	 * @return bool
+	 */
+	private function delete(string $terms, ?string $params): bool
+	{
+		try {
+			$connect = Connect::testConnection($this->database);
+			$statement = $connect->prepare("DELETE FROM {$this->entity} WHERE {$terms}");
+
+			if ($params) {
+				parse_str($params, $arrParams);
+				$statement->execute($arrParams);
+				return true;
+			}
+
+			$statement->execute();
+
+			return true;
+		} catch (PDOException $exception) {
+			$this->fail = $exception;
+			return false;
+		}
+	}
+
+	/**
+	 * @param array $data
+	 * @return array|null
+	 */
+	private function filter(array $data): ?array
+	{
+		$filter = [];
+
+		foreach ($data as $key => $value) {
+			$filter[$key] = (is_null($value) ? null : filter_var($value, FILTER_DEFAULT));
+		}
+
+		return $filter;
+	}
+
+	/**
+	 * @param array $data
+	 * @return object
+	 */
+	private function treatDataCreate(array $data): object
+	{
+		$treatData = new stdClass();
+		$treatData->data = $data;
+		$treatData->columns = '';
+		$treatData->values = '';
+
+		if ($this->functionSql) {
+			foreach ($this->functionSql as $key => $value) {
+				if (array_key_exists($key, $treatData->data)) {
+					unset($treatData->data[$key]);
+				}
+			}
+
+			$data = array_merge($this->functionSql, $data);
+			$treatData->values .= implode(', ', array_values($this->functionSql));
+		}
+
+		$treatData->columns = implode(', ', array_keys($data));
+		$treatData->values .= ($treatData->values ? ', ' : '') . ':' . implode(', :', array_keys($treatData->data));
+
+		return $treatData;
+	}
+
+	/**
+	 * @param array $data
+	 * @param array $dataSet
+	 * @return object
+	 */
+	private function treatDataUpdate(array $data, array $dataSet = []): object
+	{
+		$treatData = new stdClass();
+		$treatData->data = $data;
+		$treatData->values = '';
+
+		if ($this->functionSql) {
+			foreach ($this->functionSql as $key => $value) {
+				if (is_array($dataSet)) {
+					$dataSet[] = "{$key} = {$this->functionSql[$key]}";
+				}
+
+				if (array_key_exists($key, $treatData->data)) {
+					unset($treatData->data[$key]);
+				}
+			}
+		}
+
+		foreach ($treatData->data as $bind => $value) {
+			$dataSet[] = "{$bind} = :{$bind}";
+		}
+
+		$treatData->values .= implode(', ', $dataSet);
+
+		return $treatData;
+	}
 }
