@@ -9,56 +9,87 @@ use stdClass;
 
 /**
  * Class DataLayer
- * @package NTTech\DataLayer
+ *
+ * @package Stonks\DataLayer
  */
-abstract class DataLayer
+class DataLayer
 {
     use CrudTrait;
 
-    /** @var string $entity database table */
-    private string $entity;
+    /**
+     * @var string
+     */
+    private $entity;
 
-    /** @var string $primary table primary key field */
-    private string $primary;
+    /**
+     * @var array|null
+     */
+    private $required;
 
-    /** @var array $required table required fields */
-    private array $required;
+    /**
+     * @var string
+     */
+    private $primary;
 
-    /** @var bool $timestamps control created and updated at */
-    private bool $timestamps;
+    /**
+     * @var bool|string
+     */
+    private $timestamps;
 
-    /** @var string|null */
-    private ?string $database;
+    /**
+     * @var string|null
+     */
+    private $database;
 
-    /** @var string|null */
-    protected ?string $statement = null;
+    /**
+     * @var string|null
+     */
+    private $statement;
 
-    /** @var array|null */
-    protected ?array $params = null;
+    /**
+     * @var array|null
+     */
+    private $params;
 
-    /** @var string|null */
-    protected ?string $group = null;
+    /**
+     * @var string|null
+     */
+    private $group;
 
-    /** @var string|null */
-    protected ?string $order = null;
+    /**
+     * @var string|null
+     */
+    private $order;
 
-    /** @var string|null */
-    protected ?string $limit = null;
+    /**
+     * @var string|null
+     */
+    private $limit;
 
-    /** @var string|null */
-    protected ?string $offset = null;
+    /**
+     * @var string|null
+     */
+    private $offset;
 
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     private $saveMethod;
 
-    /** @var array|null*/
+    /**
+     * @var array|null
+     */
     private $functionSql;
 
-    /** @var PDOException|null */
-    protected ?PDOException $fail = null;
+    /**
+     * @var Exception|PDOException|null
+     */
+    private $fail;
 
-    /** @var object|null */
-    protected ?object $data = null;
+    /**
+     * @var object|null
+     */
+    private $data;
 
     /**
      * DataLayer constructor.
