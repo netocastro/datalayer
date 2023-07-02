@@ -27,7 +27,7 @@ abstract class DataLayer
     /** @var bool $timestamps control created and updated at */
     private bool $timestamps;
 
-    /** @var array|null */
+    /** @var string|null */
     private ?string $database;
 
     /** @var string|null */
