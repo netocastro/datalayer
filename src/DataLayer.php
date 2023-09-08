@@ -14,6 +14,7 @@ use stdClass;
  */
 class DataLayer
 {
+
     use CrudTrait;
 
     /**
